@@ -1,0 +1,38 @@
+;SCBSサンプルファイル
+
+# scbs
+
+//cm
+//bg room
+
+@
+ＳＣＢＳサンプルシナリオです。
+
+//chara akane
+
+@akane
+一括で改行タグを付ければ、
+誤入力防止になるし……。
+
+//mod akane happy
+
+@akane
+タグのパラメータを省略すれば、
+シナリオが見やすくなるよ！
+
+@akane
+便利だよね！
+ヤマトも**そう思うでしょ？**
+
+@yamato
+肝心の<"シナリオ"中身>がなきゃ意味無いな。
+
+//chara_mod akane angry
+//font 30
+
+@akane
+もおっ！
+熱が冷めるようなこと言わないでよ！
+
+//resetfont
+
