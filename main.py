@@ -1,13 +1,146 @@
 import os
 import sys
 import re
-import definition
+import replace_function as rf
 
-version = 0.10
+version = 0.80
+
 preset = []
 setting = {}
+default_preset = {
+"position_search": "none",
+"if_activated": "none",
+"find": "",
+"replace": "",
+"replace_function": ""
+}
+default_setting = {
+"version": version,
+"plaintext": ":",
+"extension": "ks"
+}
+
 scinario = []
 result = []
+
+def main():
+    print("____scenario_converter_by_sato____")
+
+
+    print("load preset...")
+    
+    # preset.iniがなければ新規作成
+    if not os.path.isfile("preset.ini"):
+        print("preset.ini is not found")
+        print("create preset.ini")
+        make_default_preset()
+
+    with open("preset.ini", "r", encoding="utf-8") as f:
+        p = [s.strip() for s in f.readlines()]
+    
+    load_preset(p)
+    modify_setting()
+    modify_preset()
+
+    # print(preset)
+
+    print("please enter the file to convert")
+
+    path = ""
+    
+    while os.path.exists(path) == False:
+        path = input(">>> ").strip(r'"')
+        if os.path.exists(path):
+            print("**success**")
+        else:
+            print("**fail**")
+            print("please try again")
+
+    print("load scinario...")
+
+    # シナリオファイル一行ずつリスト化
+    with open(path, "r", encoding="utf-8") as f:
+        scinario = [s.strip() for s in f.readlines()]
+
+
+    print("convert scinario...")
+
+    i = 0
+
+    re_str = re.compile(r".+")
+
+    for s in scinario:
+        j = 0
+        result.append("")
+        is_applicable = False
+        is_search = False
+        plaintext = ""
+
+        # plaintext
+        if re.search(setting["plaintext"], s) != None:
+            s, plaintext = s.split(setting["plaintext"], 1)
+
+        for p in preset:
+            
+            # position_search
+            if p["position_search"] == "begin":
+                if i == 0:
+                    is_search = True
+                elif "" == scinario[i-1]:
+                    is_search = True
+                else:
+                    is_search = False
+
+            elif p["position_search"] == "middle":
+                if i == 0:
+                    is_search = False
+                elif i == len(scinario) - 1:
+                    is_search = False
+                elif re.match(re_str, scinario[i-1]) != None and re.match(re_str, scinario[i+1]) != None:
+                    is_search = True
+                else:
+                    is_search = False
+
+            elif p["position_search"] == "end":
+                if i == len(scinario) - 1:
+                    is_search = True
+                elif "" == scinario[i+1]:
+                    is_search = True
+                else:
+                    is_search = False
+
+            else:
+                is_search = True
+
+
+            # convert
+            if is_search:
+                result[i],is_applicable = convert_scinario(s, j)
+
+            s = result[i]
+            j = j + 1
+            
+            # if_activated
+            if p["if_activated"] == "none" and is_applicable:
+                break
+
+        result[i] = result[i] + plaintext + "\n"
+        i = i + 1
+
+
+    print("output scinario...")
+    output_path = "./result/" + os.path.splitext(os.path.basename(path))[0] + "." + setting["extension"]
+
+    if not os.path.isdir("./result"):
+        os.mkdir("./result")
+
+    with open(output_path, "w") as f:
+        f.writelines(result)
+
+    print("**complete**")
+
+    input("please press any key")
+
 
 def load_preset(preset_list=[]):
     # ヘッダーの正規表現定義
@@ -46,95 +179,132 @@ def load_preset(preset_list=[]):
 
 
 def set_parameter(str):
-    result = str.split("=")
+    result = str.split("=", 1)
     return result
 
 def modify_setting():
-    # 構文が不正ならフォロー（あるべき値が無い、パラメータ指定が間違っている）
-    pass
+    # キーが存在しなければデフォルト値を代入
+    if not "version" in setting:
+        setting["version"] = default_setting["version"]
+
+    if not "plaintext" in setting:
+        setting["plaintext"] = default_setting["plaintext"]
+
+    if not "extension" in setting:
+        setting["extension"] = default_setting["extension"]
+
+
+    # 値が不正ならデフォルト値を代入
+    if type(setting["version"]) is not float:
+        if type(setting["version"]) is not int:
+            # 整数であれば許容
+            setting["version"] = float(setting["version"])
+        else:
+            setting["version"] = default_setting["version"]
+
+    if type(setting["plaintext"]) is not str:
+        setting["plaintext"] = default_setting["plaintext"]
+
+    if type(setting["extension"]) is not str:
+        setting["extension"] = default_setting["extension"]
+
+    # ファイル名に使えない文字列は除外
+    reserch = re.compile(r'[\\|/|:|?|.|*|"|<|>|\|]')
+    setting["extension"] = re.sub(reserch, "", setting["extension"])
+
 
 def modify_preset():
-    # 構文が不正ならフォロー（あるべき値が無い、パラメータ指定が間違っている）
-    pass
-
-def convert_scinario():
-    # 検索
-    # 置換
-    # 関数実行
-    return ""
-
-
-def make_default_preset():
-    with open("preset.ini", "w") as f:
-        setting = "[@SETTING]\nversion=0.10\nplaintext=:\nextension=ks\n"
-        preset = "[]\nposition_search=none\nif_activated=none\ndefinition1=\ndefinition2=\ndefinition_function=\n"
-        end ="[@END]"
-        f.write(setting)
-        f.write(preset)
-        f.write(end)
-
-
-if __name__ == "__main__":
-    print("____scenario_converter_by_sato____")
-
-
-    print("load preset...")
-    
-    # preset.iniがなければ新規作成
-    if not os.path.isfile("preset.ini"):
-        print("preset.ini is not found")
-        print("create preset.ini")
-        make_default_preset()
-
-    with open("preset.ini", "r") as f:
-        p = [s.strip() for s in f.readlines()]
-    
-    load_preset(p)
-    modify_setting()
-    modify_preset()
-
-
-    print("please enter the file to convert")
-
-    path = ""
-    
-    while os.path.exists(path) == False:
-        path = input(">>> ").strip(r'"')
-        if os.path.exists(path):
-            print("**success**")
-        else:
-            print("**fail**")
-            print("please try again")
-
-    print("load scinario...")
-
-    # シナリオファイル一行ずつリスト化
-    with open(path, "r", encoding="utf-8") as f:
-        scinario = [s.strip() for s in f.readlines()]
-
-
-    print("convert scinario...")
     i = 0
-    for s in scinario:
-        result.append("")
-        for p in preset:
-            result[i] = convert_scinario()
-            # if_activated
+    for p in preset:
+        # キーが存在しなければデフォルト値を代入
+        if not "position_search" in p:
+            preset[i]["position_search"] = default_preset["position_search"]
 
-        result[i] = result[i] + "\n"
-        print(result)
+        if not "if_activated" in p:
+            preset[i]["if_activated"] = default_preset["if_activated"]
+
+        if not "find" in p:
+            preset[i]["find"] = default_preset["find"]
+
+        if not "replace" in p:
+            preset[i]["replace"] = default_preset["replace"]
+
+        if not "replace_function" in p:
+            preset[i]["replace_function"] = default_preset["replace_function"]
+
+        # 値が不正ならデフォルト値を代入
+        if not re.fullmatch(r"none|bigin|middle|end", p["position_search"]):
+            preset[i]["position_search"] = default_preset["position_search"]
+
+        if not re.fullmatch(r"none|continue", p["if_activated"]):
+            preset[i]["if_activated"] = default_preset["if_activated"]
+
+        # 存在しない関数を指定していたらデフォルト値
+        is_function = False
+        for key in rf.function_dict:
+            if preset[i]["replace_function"] == key:
+                is_function = True
+
+        if not is_function:
+            preset[i]["replace_function"] = default_preset["replace_function"]
+
+        if preset[i]["find"] == "":
+            # 検索文字未指定の場合はNoneを代入
+            preset[i]["find"] = None
+        else:
+            # 正規表現を事前にコンパイル
+            preset[i]["find"] = re.compile(p["find"])
+
         i = i + 1
 
 
-    print("output scinario...")
-    output_path = "./result/" + os.path.splitext(os.path.basename(path))[0] + "." + setting["extension"]
 
-    if not os.path.isdir("./result"):
-        os.mkdir("./result")
+def convert_scinario(s, number):
+    global preset
+    result = ""
+    is_applicable = False
 
-    with open(output_path, "w") as f:
-        f.writelines(result)
+    # 検索文字列が指定されていれば置換する
+    if preset[number]["find"] != None:
+        result = re.sub(preset[number]["find"], preset[number]["replace"], s)
+    else:
+        result = s
 
-    print("**complete**")
+    # 関数実行
+    if not preset[number]["replace_function"] == "":
+        func = preset[number]["replace_function"]
+        result, is_applicable = rf.function_dict[func](result)
 
-    print("please press any key")
+    # 変換が行われていれば記録
+    if preset[number]["find"] != None:
+        if re.match(preset[number]["find"], s) != None:
+            is_applicable = True
+
+    return result, is_applicable
+
+
+def make_default_preset():
+    global setting
+    global preset
+    result = ""
+
+    # setting
+    result = result + "[@SETTING]\n"
+    for key in default_setting:
+        result = result + key + "=" + str(default_setting[key]) + "\n"
+
+    # preset
+    result = result + "[]\n"
+    for key in default_preset:
+        result = result + key + "=" + str(default_preset[key]) + "\n"
+
+    # end
+    result = result + "[@END]"
+
+    with open("preset.ini", "w") as f:
+
+        f.write(result)
+
+
+if __name__ == "__main__":
+    main()
