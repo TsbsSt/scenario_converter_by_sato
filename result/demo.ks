@@ -1,4 +1,4 @@
-;SCBSサンプルファイル[p]
+;SCBSサンプルファイル
 
 *scbs
 
@@ -22,7 +22,7 @@
 
 #akane
 「便利だよね！[r]
-ヤマトも[ruby test="・"]そ[ruby test="・"]う[ruby test="・"]思[ruby test="・"]う[ruby test="・"]で[ruby test="・"]しょ？」[p]
+ヤマトも[ruby text="・"]そ[ruby text="・"]う[ruby text="・"]思[ruby text="・"]う[ruby text="・"]で[ruby text="・"]しょ？」[p]
 
 #yamato
 「肝心のシナリオがなきゃ意味無いな」[p]

@@ -6,16 +6,30 @@ function_dict = {}
 
 def replace_emphasis(s):
     result = ""
-    is_applicable = False
 
-    if re.search(r'\[ruby test="・"\]', s) != None:
-        result = re.sub(r'<\[ruby test="・"\]', r'[ruby test="・"]', s)
-        result = re.sub(r'\[ruby test="・"\]>', '', result)
-
-        is_applicable = True
+    if re.search(r'\[ruby text="・"\]', s) != None:
+        result = s
+        result = re.sub(r'<\[ruby text="・"\]', r'[ruby text="・"]', result)
+        result = re.sub(r'\[ruby text="・"\]>', '', result)
     else:
         result = s
 
-    return result, is_applicable
+
+    return result
 
 function_dict["replace_emphasis"] = replace_emphasis
+
+
+def replace_emphasis_rp(s):
+    result = ""
+
+    if re.search(r'\{rt\}・\{/rt\}', s) != None:
+        result = s
+        result = re.sub(r'<\{rt\}・\{/rt\}', '', result)
+        result = re.sub(r'\{rt\}・\{/rt\}>', '{rt\}・{/rt}', result)
+    else:
+        result = s
+
+    return result
+
+function_dict["replace_emphasis_rp"] = replace_emphasis_rp

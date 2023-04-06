@@ -2,7 +2,7 @@ import os
 import re
 import replace_function as rf
 
-version = 0.80
+version = 0.81
 
 preset = []
 setting = {}
@@ -19,31 +19,11 @@ default_setting = {
 "extension": "ks"
 }
 
-scinario = []
-result = []
-
 def main():
+
     print("____scenario_converter_by_sato____")
 
-
-    print("load preset...")
-    
-    # preset.iniがなければ新規作成
-    if not os.path.isfile("preset.ini"):
-        print("preset.ini is not found")
-        print("create preset.ini")
-        make_default_preset()
-
-    with open("preset.ini", "r", encoding="utf-8") as f:
-        p = [s.strip() for s in f.readlines()]
-    
-    load_preset(p)
-    modify_setting()
-    modify_preset()
-
-    # print(preset)
-
-    print("please enter the file to convert")
+    print("1. please enter the file to convert")
 
     path = ""
     
@@ -55,77 +35,47 @@ def main():
             print("**fail**")
             print("please try again")
 
+    print("2. please enter preset.ini")
+    print("(if blank, the default preset is loaded.)")
+
+    path_preset = ""
+
+    while os.path.exists(path_preset) == False or os.path.basename(path_preset) != "preset.ini":
+        path_preset = input(">>> ").strip(r'"')
+        if path_preset == "":
+            print("**load the default preset**")
+            path_preset = "./preset.ini"
+        elif os.path.exists(path_preset) and os.path.basename(path_preset) == "preset.ini":
+            print("**success**")
+        else:
+            print("**fail**")
+            print("please try again")
+
+    print("load preset...")
+    
+    # preset.iniがなければ新規作成
+    if not os.path.isfile("preset.ini"):
+        print("preset.ini is not found")
+        print("create preset.ini")
+        make_default_preset()
+
+    with open(path_preset, "r", encoding="utf-8") as f:
+        p = [s.strip() for s in f.readlines()]
+    
+    # print(preset)
+
+    load_preset(p)
+    modify_setting()
+    modify_preset()
+
     print("load scinario...")
 
     # シナリオファイル一行ずつリスト化
     with open(path, "r", encoding="utf-8") as f:
         scinario = [s.strip() for s in f.readlines()]
 
-
     print("convert scinario...")
-
-    i = 0
-
-    re_str = re.compile(r".+")
-
-    for s in scinario:
-        j = 0
-        result.append("")
-        is_applicable = False
-        is_search = False
-        plaintext = ""
-
-        # plaintext
-        if re.search(setting["plaintext"], s) != None:
-            s, plaintext = s.split(setting["plaintext"], 1)
-
-        for p in preset:
-            
-            # position_search
-            if p["position_search"] == "begin":
-                if i == 0:
-                    is_search = True
-                elif "" == scinario[i-1]:
-                    is_search = True
-                else:
-                    is_search = False
-
-            elif p["position_search"] == "middle":
-                if i == 0:
-                    is_search = False
-                elif i == len(scinario) - 1:
-                    is_search = False
-                elif re.match(re_str, scinario[i-1]) != None and re.match(re_str, scinario[i+1]) != None:
-                    is_search = True
-                else:
-                    is_search = False
-
-            elif p["position_search"] == "end":
-                if i == len(scinario) - 1:
-                    is_search = True
-                elif "" == scinario[i+1]:
-                    is_search = True
-                else:
-                    is_search = False
-
-            else:
-                is_search = True
-
-
-            # convert
-            if is_search:
-                result[i],is_applicable = convert_scinario(s, j)
-
-            s = result[i]
-            j = j + 1
-            
-            # if_activated
-            if p["if_activated"] == "none" and is_applicable:
-                break
-
-        result[i] = result[i] + plaintext + "\n"
-        i = i + 1
-
+    result = convert_scinario(scinario)
 
     print("output scinario...")
     output_path = "./result/" + os.path.splitext(os.path.basename(path))[0] + "." + setting["extension"]
@@ -256,9 +206,74 @@ def modify_preset():
 
         i = i + 1
 
+def convert_scinario(scinario):
+    global setting
+    global preset
+    result = []
+    i = 0
 
+    re_str = re.compile(r".+")
 
-def convert_scinario(s, number):
+    for s in scinario:
+        j = 0
+        result.append("")
+        is_applicable = False
+        is_search = False
+        plaintext = ""
+
+        # plaintext
+        if re.search(setting["plaintext"], s) != None:
+            s, plaintext = s.split(setting["plaintext"], 1)
+
+        for p in preset:
+            
+            # position_search
+            if p["position_search"] == "begin":
+                if i == 0:
+                    is_search = True
+                elif "" == scinario[i-1]:
+                    is_search = True
+                else:
+                    is_search = False
+
+            elif p["position_search"] == "middle":
+                if i == 0:
+                    is_search = False
+                elif i == len(scinario) - 1:
+                    is_search = False
+                elif re.match(re_str, scinario[i-1]) != None and re.match(re_str, scinario[i+1]) != None:
+                    is_search = True
+                else:
+                    is_search = False
+
+            elif p["position_search"] == "end":
+                if i == len(scinario) - 1:
+                    is_search = True
+                elif "" == scinario[i+1]:
+                    is_search = True
+                else:
+                    is_search = False
+
+            else:
+                is_search = True
+
+            # convert
+            if is_search:
+                result[i],is_applicable = convert_line(s, j)
+
+            s = result[i]
+            j = j + 1
+            
+            # if_activated
+            if p["if_activated"] == "none" and is_applicable:
+                break
+
+        result[i] = result[i] + plaintext + "\n"
+        i = i + 1
+
+    return result
+
+def convert_line(s, number):
     global preset
     result = ""
     is_applicable = False
@@ -269,15 +284,15 @@ def convert_scinario(s, number):
     else:
         result = s
 
-    # 関数実行
-    if not preset[number]["replace_function"] == "":
-        func = preset[number]["replace_function"]
-        result, is_applicable = rf.function_dict[func](result)
-
     # 変換が行われていれば記録
     if preset[number]["find"] != None:
-        if re.match(preset[number]["find"], s) != None:
+        if re.search(preset[number]["find"], s) != None:
             is_applicable = True
+
+    # 関数実行
+    if preset[number]["replace_function"] != "" and is_applicable == True:
+        func = preset[number]["replace_function"]
+        result = rf.function_dict[func](result)
 
     return result, is_applicable
 
