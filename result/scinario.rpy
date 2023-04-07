@@ -3,44 +3,44 @@ label start:
 $ bg("hoge")
 $ pbgm("hoge")
 
-line narrator"
-ƒiƒŒ[ƒVƒ‡ƒ“B"
+line narrator "
+ãƒŠãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ã€‚"
 
 set_chara "skm" l2
 hyojo "skm" nor
 
-line skm"
-uƒZƒŠƒtv"
+line skm "
+ã€Œã‚»ãƒªãƒ•ã€"
 
 set_chara "igt" r3
 hyojo "igt" nor
 
-line igt"
-uƒZƒŠƒtv"
+line igt "
+ã€Œã‚»ãƒªãƒ•ã€"
 
 hyojo_mode "igt" pupil2 True
 hyojo_item "skm" sweat 1
 hyojo_part "skm" blow nor
 
-line skm"
-wƒZƒŠƒtx"
+line skm "
+ã€ã‚»ãƒªãƒ•ã€"
 
 hide_chara igt
 $ se("hoge")
 $ hode = hoge
 
-line skm"
-iƒ‚ƒmƒ[ƒOj"
+line skm "
+ï¼ˆãƒ¢ãƒãƒ­ãƒ¼ã‚°ï¼‰"
 
 set_chara "igt" r3
 
-line igt"
-uƒZƒŠƒtB
-ƒZƒŠƒtv"
+line igt "
+ã€Œã‚»ãƒªãƒ•ã€‚
+ã‚»ãƒªãƒ•ã€"
 
-line igt"
-u{rb}ƒZƒŠƒt{/rb}{rt}‘äŒ{/rt}B
-ƒZ{rt}E{/rt}ƒŠ{rt}E{/rt}ƒt{rt\}E{/rt}v"
+line igt "
+ã€Œ{rb}ã‚»ãƒªãƒ•{/rb}{rt}å°è©{/rt}ã€‚
+ã‚»{rt}ãƒ»{/rt}ãƒª{rt}ãƒ»{/rt}ãƒ•{rt}ãƒ»{/rt}ã€"
 
 hide_chara_all
 $ sbgm()
