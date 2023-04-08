@@ -86,7 +86,7 @@ def main():
 
     print("**complete**")
 
-    # input("please press any key")
+    input("please press any key")
 
 
 def load_preset(preset_list=[]):
