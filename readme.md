@@ -121,6 +121,7 @@ preset.iniには以下の様なルールで記入します。
 
 変換に使用するpython関数を指定します。
 「replace_function.py」内の関数を指定することを想定しています。
+（exe版ではユーザーが関数を作ることはできません）
 
 find・replaceによる変換を行った上で、replace_functionによる変換を行います。
 つまりfindで検索されなかった行では関数が実行されません。
