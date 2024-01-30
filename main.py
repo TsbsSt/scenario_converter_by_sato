@@ -2,7 +2,7 @@ import os
 import re
 import replace_function as rf
 
-version = 0.82
+version = 0.83
 
 preset = []
 setting = {}
@@ -26,12 +26,34 @@ def main():
 
     print("1. please enter the file to convert")
 
-    path = ""
+    files = None
 
-    while os.path.exists(path) is False:
-        path = input(">>> ").strip(r'"')
-        if os.path.exists(path):
+    while True:
+        # パスには"が含まれるため取り除く
+        input_path = input(">>> ")
+
+        files = input_path.split(",")
+
+        for i in range(0, len(files)):
+            files[i] = files[i].strip(r'"')
+
+        print("check file existence")
+        
+        i = 0
+
+        for f in files:
+
+            if os.path.exists(f):
+                print(f"{i}-----**OK**")
+            else:
+                print(f"{i}-----**NG**")
+                del files[i]
+
+            i = i + 1
+
+        if len(files) > 0:
             print("**success**")
+            break
         else:
             print("**fail**")
             print("please try again")
@@ -43,14 +65,14 @@ def main():
 
     while True:
         path_preset = input(">>> ").strip(r'"')
-        path_ecists = os.path.exists(path_preset)
+        path_exists = os.path.exists(path_preset)
         path_bassname = os.path.basename(path_preset)
 
         if path_preset == "":
             print("**load the default preset**")
             path_preset = "./preset.ini"
             break
-        elif path_ecists and path_bassname == "preset.ini":
+        elif path_exists and path_bassname == "preset.ini":
             print("**success**")
             break
         else:
@@ -75,14 +97,34 @@ def main():
     print("load scinario...")
 
     # シナリオファイル一行ずつリスト化
-    with open(path, "r", encoding="utf-8") as f:
-        scinario = [s.strip() for s in f.readlines()]
 
-    print("convert scinario...")
-    result = convert_scinario(scinario)
+    scinario = []
+    result = []
 
-    print("output scinario...")
-    output_scinario(path, result)
+    for path in files:
+
+        with open(path, "r", encoding="utf-8") as f:
+            scinario.append([
+                path,
+                [s.strip() for s in f.readlines()]
+                ])
+
+    for s in scinario:
+
+        basename = os.path.splitext(os.path.basename(s[0]))[0]
+
+        print(f"convert scinario --- {basename}")
+        result.append([
+            s[0],
+            convert_scinario(s[1])
+            ])
+
+    for r in result:
+
+        basename = os.path.splitext(os.path.basename(r[0]))[0]
+
+        print(f"output scinario --- {basename}")
+        output_scinario(r[0], r[1])
 
     print("**complete**")
 

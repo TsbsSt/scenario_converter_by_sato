@@ -8,10 +8,10 @@ function_dict = {}
 def replace_emphasis(s):
     result = ""
 
-    if re.search(r'\[ruby text="・"\]', s) is not None:
+    if re.search(r'\[oct_mc_em\]', s) is not None:
         result = s
-        result = re.sub(r'<\[ruby text="・"\]', r'[ruby text="・"]', result)
-        result = re.sub(r'\[ruby text="・"\]>', '', result)
+        result = re.sub(r'<\[oct_mc_em]', r'[oct_mc_em]', result)
+        result = re.sub(r'\[oct_mc_em]>', '', result)
     else:
         result = s
 
